@@ -115,20 +115,7 @@ echo "Building Valetudo frontend..."
 npm run build --workspace=frontend | _log || warning "Failed to npm run build"
 echo
 
-# cd backend || warning "Failed to cd into backend"
-
-# echo "Building Valetudo backend"
-# echo "You must stop it manually by running Ctrl+C"
-# npm run start | log &
-# pid=$!
-# echo
-
-# echo "Waiting for backend..."
-# sleep 10s
-# kill -9 "$pid"
-# echo
-
-# cd "${VALETUDO_LOCAL_PATH}" || warning "Failed to cd into Valetudo"
+cd backend || warning "Failed to cd into backend"
 
 echo "Building Valetudo..."
 npm run build | _log || warning "Failed to npm run build"
@@ -138,6 +125,7 @@ echo
 echo "Copying Valetudo to conga..."
 ssh  "root@${CONGA_IP}" "mkdir -p '${VALETUDO_CONGA_PATH}'" | _log || warning "Failed to scp Valetudo to conga"
 scp  "${VALETUDO_LOCAL_PATH}/build/armv7/valetudo" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo to conga"
+ssh "root@${CONGA_IP}" "chmod +x '${VALETUDO_CONGA_PATH}/valetudo'" | _log || warning "Failed to chmod Valetudo to conga"
 scp  "${SCRIPT_CONFIG_PATH}/${VALETUDO_VERSION}.json" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo JSON config to conga"
 echo
 
