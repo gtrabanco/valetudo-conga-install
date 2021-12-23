@@ -1,5 +1,5 @@
 ## UNTESTED
-**WARNING!** This is an untested repository. These scripts could be dangerous to be used!
+**WARNING!** This is an untested repository. These scripts could damage your conga!
 
 - [Introduction](#introduction)
 - [Usage](#usage)
