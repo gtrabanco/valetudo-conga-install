@@ -7,13 +7,13 @@
 ##? Usage:
 ##?  conga-install-valetudo [--version]
 ##?  conga-install-valetudo [-h | --help]
-##?  conga-install-valetudo [-s | --show-config-versions]
+##?  conga-install-valetudo [-s | --show-versions]
 ##?  conga-install-valetudo [-v | --valetudo-version <version>] <conga_ip>
 ##?
 ##? Options:
 ##?   --version                  Show this script version.
 ##?   -h --help                  Show this screen.
-##?   -s --show-config-versions  Show the valetudo available default configs versions. This is the default configuration file version to be installed.
+##?   -s --show-versions         Show the valetudo available default configs versions. This is the default configuration file version to be installed.
 ##?   -v --valetudo-version      Valetudo version to install.
 ##?
 ##? Author: Gabriel Trabanco Llano <gtrabanco@users.noreply.github.com>
@@ -25,7 +25,6 @@ CONGA_IP="${1:-}"
 SCRIPT_BIN_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPT_PATH="$(dirname "$SCRIPT_BIN_PATH")"
 SCRIPT_LIB_PATH="${SCRIPT_PATH}/lib"
-SCRIPT_CONFIG_PATH="${SCRIPT_PATH}/configs"
 SCRIPT_ASSETS_PATH="${SCRIPT_PATH}/assets"
 VALETUDO_GIT_REPOSITORY="${VALETUDO_GIT_REPOSITORY:-https://github.com/adrigzr/Valetudo.git}"
 VALETUDO_GIT_BRANCH="${VALETUDO_GIT_BRANCH:-feature/conga}"
@@ -49,8 +48,8 @@ while [ $# -gt 0 ]; do
       VALETUDO_VERSION="${2:-${VALETUDO_VERSION:-2021.09.1}}"
       shift 2
       ;;
-    --show-config-versions|-s)
-      find "$SCRIPT_CONFIG_PATH" -name "*.json" -print0 | xargs -0 -I_ basename _ | cut -d. -f1
+    --show-versions|-s)
+      find "$SCRIPT_ASSETS_PATH" -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 -I_ basename _
       exit
       ;;
     *)
