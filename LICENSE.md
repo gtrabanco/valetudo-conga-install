@@ -1,0 +1,1 @@
+Public domain. Do whatever you want with this repository but don't be too evil.

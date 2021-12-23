@@ -1,3 +1,6 @@
+## UNTESTED
+**WARNING!** This is an untested repository. These scripts could be dangerous to be used!
+
 - [Introduction](#introduction)
 - [Usage](#usage)
   - [Reqirements](#reqirements)
@@ -7,6 +10,9 @@
   - [Install ssh public key manually](#install-ssh-public-key-manually)
   - [Install valetudo manually](#install-valetudo-manually)
 
+
+## WARRANTY
+Disclaimer of Software Warranty. LICENSES THE LICENSED SOFTWARE "AS IS," AND MAKES NO EXPRESS OR IMPLIED WARRANTY OF ANY KIND. SPECIFICALLY DISCLAIMS ALL INDIRECT OR IMPLIED WARRANTIES TO THE FULL EXTENT ALLOWED BY APPLICABLE LAW, INCLUDING WITHOUT LIMITATION ALL IMPLIED WARRANTIES OF, NON-INFRINGEMENT, MERCHANTABILITY, TITLE OR FITNESS FOR ANY PARTICULAR PURPOSE. NO ORAL OR WRITTEN INFORMATION OR ADVICE GIVEN BY ANY PERSON IN ANY ISSUE OR BY THE DOC OF THIS REPOSITORY, ITS MANTAINERS OR COLLABORATORS OF ANY KIND SHALL CREATE A WARRANTY.
 ## Introduction
 
 These scripts are intended to make easier the instalation of Valetudo in Congas.
