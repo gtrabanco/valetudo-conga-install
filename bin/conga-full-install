@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+SCRIPT_BIN_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+CONGA_IP_ADDRESS="${1:-}"
+
+if [ -z "${CONGA_IP_ADDRESS}" ]; then
+  "${SCRIPT_BIN_PATH}/conga-install-unknown-ipv4"
+else
+  "${SCRIPT_BIN_PATH}/conga-install-ssh" "${CONGA_IP_ADDRESS}" || echo "Failed to install ssh" && exit 1
+  "${SCRIPT_BIN_PATH}/conga-install-valetudo" "${CONGA_IP_ADDRESS}" || echo "Failed to install valetudo" && exit 1
+fi
