@@ -26,7 +26,7 @@ if [ ${#GET_ALL_NET_IPS[@]} -eq 0 ]; then
 fi
 
 for ip in "${GET_ALL_NET_IPS[@]}"; do
-  [ -z "${:-}" ] && continue
+  [ -z "${ip:-}" ] && continue
 
   echo
   echo "Scanning the range ${ip}.1-255"
