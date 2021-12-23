@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+GIT_REPOSITORY="${GIT_REPOSITORY:-git@github.com:gtrabanco/valetudo-conga-install.git}"
+CONGA_INSTALL_PATH="${CONGA_INSTALL_PATH:-${HOME}/valetudo-conga-install}"
+
+depends_on() {
+  if
+    [ -n "${1:-}" ] &&
+    ! command -v "${1:-}" >/dev/null 2>&1
+  then
+    echo "Missing dependency: ${1:-}"
+    exit 1
+  fi
+
+  [ $# -gt 1 ] &&  "${FUNCNAME[0]}" "${@:2}"
+}
+
+depends_on git curl
+
+[ -d "/mnt/UDISK" ] &&
+  echo "This script must be used in your computer and not in your conga" &&
+  exit 1
+
+CONGA_INSTALL_PATH="${HOME}/valetudo-conga-install"
+git clone "$GIT_REPOSITORY" "$CONGA_INSTALL_PATH"
+
+"${CONGA_INSTALL_PATH}/bin/conga-full-install" || echo "Something was terribly wrong" && echo "https://www.youtube.com/watch?v=t3otBjVZzT0" && exit 1
