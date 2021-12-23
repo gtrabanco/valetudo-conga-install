@@ -95,38 +95,44 @@ if [ ! -r "${SCRIPT_CONFIG_PATH}/${VALETUDO_VERSION}.json" ]; then
   exit 1
 fi
 
-echo "Downloading Valetudo for Congas..."
-git clone "${VALETUDO_GIT_REPOSITORY}" "${VALETUDO_LOCAL_PATH}" | _log || warning "Failed to clone Valetudo"
-cd "${VALETUDO_LOCAL_PATH}" || warning "Failed to cd into Valetudo"
+if [ -f "${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/binary/valetudo" ]; then
+  VALETUDO_BINARY="${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/binary/valetudo"
+else
+  echo "Downloading Valetudo for Congas..."
+  git clone "${VALETUDO_GIT_REPOSITORY}" "${VALETUDO_LOCAL_PATH}" | _log || warning "Failed to clone Valetudo"
+  cd "${VALETUDO_LOCAL_PATH}" || warning "Failed to cd into Valetudo"
 
-echo "Executing npm install... This will take a very long time depending on your internet connection."
-npm install | _log || warning "Failed to npm install"
-echo
+  echo "Executing npm install... This will take a very long time depending on your internet connection."
+  npm install | _log || warning "Failed to npm install"
+  echo
 
-echo "Executing npm clean install."
-npm ci | _log || warning "Failed to npm ci"
-echo
+  echo "Executing npm clean install."
+  npm ci | _log || warning "Failed to npm ci"
+  echo
 
-echo "Building openapi schema."
-npm run build_openapi_schema | _log || warning "Failed to npm run build_openapi_schema"
-echo
+  echo "Building openapi schema."
+  npm run build_openapi_schema | _log || warning "Failed to npm run build_openapi_schema"
+  echo
 
-echo "Building Valetudo frontend..."
-npm run build --workspace=frontend | _log || warning "Failed to npm run build"
-echo
+  echo "Building Valetudo frontend..."
+  npm run build --workspace=frontend | _log || warning "Failed to npm run build"
+  echo
 
-cd backend || warning "Failed to cd into backend"
+  cd backend || warning "Failed to cd into backend"
 
-echo "Building Valetudo..."
-npm run build | _log || warning "Failed to npm run build"
-[ ! -r "${VALETUDO_LOCAL_PATH}/build/armv7/valetudo" ] && warning "Failed to build valetudo"
-echo
+  echo "Building Valetudo..."
+  npm run build | _log || warning "Failed to npm run build"
+  [ ! -r "${VALETUDO_LOCAL_PATH}/build/armv7/valetudo" ] && warning "Failed to build valetudo"
+  echo
 
-echo "Copying Valetudo to conga..."
-ssh  "root@${CONGA_IP}" "mkdir -p '${VALETUDO_CONGA_PATH}'" | _log || warning "Failed to scp Valetudo to conga"
-scp  "${VALETUDO_LOCAL_PATH}/build/armv7/valetudo" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo to conga"
+  echo "Copying Valetudo to conga..."
+  ssh  "root@${CONGA_IP}" "mkdir -p '${VALETUDO_CONGA_PATH}'" | _log || warning "Failed to scp Valetudo to conga"
+  VALETUDO_BINARY="${VALETUDO_LOCAL_PATH}/build/armv7/valetudo"
+fi
+
+scp  "$VALETUDO_BINARY" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed uploading Valetudo to the conga"
 ssh "root@${CONGA_IP}" "chmod +x '${VALETUDO_CONGA_PATH}/valetudo'" | _log || warning "Failed to chmod Valetudo to conga"
-scp  "${SCRIPT_CONFIG_PATH}/${VALETUDO_VERSION}.json" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo JSON config to conga"
+scp  "${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/config/valetudo.json" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo JSON config to conga"
 echo
 
 echo "Resolving domains to localhost..."
