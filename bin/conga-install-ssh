@@ -2,10 +2,13 @@
 #shellcheck disable=SC2207,SC1091
 
 CONGA_IP="${1:-}"
-KNOWN_CONGA_PASSWORDS=(
-  "3irobotics"
-  "@3I#sc\$RD%xm^2S&"
-)
+
+if [ -z "${KNOWN_CONGA_PASSWORDS[*]}" ]; then
+  KNOWN_CONGA_PASSWORDS=(
+    "3irobotics"
+    "@3I#sc\$RD%xm^2S&"
+  )
+fi
 SCRIPT_BIN_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPT_LIB_PATH="$(dirname "$SCRIPT_BIN_PATH")/lib"
 
