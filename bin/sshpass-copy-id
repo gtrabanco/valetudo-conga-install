@@ -1,8 +1,11 @@
 #!/usr/bin/expect -f
-set user [lindex $argv 0]
-set server [lindex $argv 1]
-set port [lindex $argv 2]
-set passwd [lindex $argv 3]
+set server [lindex $argv 0]
+set passwd [lindex $argv 2]
+set user [lindex $argv 3]
+set port [lindex $argv 4]
+
+if {$user eq ""} {set user root}
+if {$port eq ""} {set port 22}
 
 send_user "Connecting to ${server}:${port} with password: $passwd \n"
 
@@ -23,12 +26,10 @@ expect {
     incr try
     send -- "$passwd\r"
     send -- "\r"
-    expect {
-      "*Number of key(s) added: 1*" { exit 0 }
-      "*ermission denied*" { exit 1 }
-    }
-
-    expect eof { exit 0 }
+    send_user "login with password\n"
   }
+  "*Number of key(s) added: 1*" { exit 0 }
+  "*ermission denied*" { exit 1 }
+  eof { exit 0 }
 }
 exit 1
