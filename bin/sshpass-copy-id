@@ -1,8 +1,8 @@
 #!/usr/bin/expect -f
 set server [lindex $argv 0]
-set passwd [lindex $argv 2]
-set user [lindex $argv 3]
-set port [lindex $argv 4]
+set passwd [lindex $argv 1]
+set user [lindex $argv 2]
+set port [lindex $argv 3]
 
 if {$user eq ""} {set user root}
 if {$port eq ""} {set port 22}
