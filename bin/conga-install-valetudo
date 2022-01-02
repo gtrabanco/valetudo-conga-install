@@ -126,10 +126,12 @@ echo "THIS STEP COULD TAKE MORE THAN 2 MINUTES DEPENDING ON YOUR LOCAL WIFI CONN
   ssh "root@${CONGA_IP}" "rm -f '${VALETUDO_CONGA_PATH}/valetudo'"
   scp  "$VALETUDO_BINARY" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/"
   ssh "root@${CONGA_IP}" "chmod +x '${VALETUDO_CONGA_PATH}/valetudo'"
+  if ssh "root@${CONGA_IP}" "test -f '${VALETUDO_CONGA_PATH}/valetudo_config.json'"; then
+    ssh "root@${CONGA_IP}" "mv '${VALETUDO_CONGA_PATH}/valetudo_config.json' '${VALETUDO_CONGA_PATH}/valetudo_config.json.$(date +%s)'"
+  fi
   scp  "$VALETUDO_CONFIG_FILE" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/"
 } || warning "Failed uploading Valetudo & config file to the conga"
 echo
-
 
 if ! ssh "root@${CONGA_IP}" 'grep -q "127.0.0.1  cecotec.das.3irobotix.net cecotec.download.3irobotix.net cecotec.log.3irobotix.net cecotec.ota.3irobotix.net eu.das.3irobotics.net eu.log.3irobotics.net eu.ota.3irobotics.net cecotec-das.3irobotix.net cecotec-log.3irobotix.net cecotec-upgrade.3irobotix.net cecotec-download.3irobotix.net" /etc/hosts'; then
   echo "Resolving cecotec domains to localhost..."
