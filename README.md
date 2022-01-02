@@ -1,5 +1,5 @@
 ## UNTESTED
-**WARNING!** This is an untested repository. These scripts could damage your conga!
+**WARNING!** These scripts could damage your vacuum!
 
 - [UNTESTED](#untested)
 - [WARRANTY](#warranty)
