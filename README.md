@@ -1,14 +1,17 @@
 ## UNTESTED
 **WARNING!** This is an untested repository. These scripts could damage your conga!
 
+- [UNTESTED](#untested)
+- [WARRANTY](#warranty)
 - [Introduction](#introduction)
 - [Usage](#usage)
   - [Reqirements](#reqirements)
   - [General usage](#general-usage)
-  - [Full automate installation instructions](#full-automate-installation-instructions)
   - [Manually Knowing the ip address of your conga](#manually-knowing-the-ip-address-of-your-conga)
+  - [Full automate installation instructions](#full-automate-installation-instructions)
   - [Install ssh public key manually](#install-ssh-public-key-manually)
   - [Install valetudo manually](#install-valetudo-manually)
+- [TESTING](#testing)
 
 
 ## WARRANTY
@@ -36,16 +39,6 @@ git clone git@github.com:gtrabanco/valetudo-conga-install.git "$CONGA_INSTALL_PA
 
 This readme will be redacted as this repository were downloaded in `CONGA_INSTALL_PATH` variable
 
-### Full automate installation instructions
-
-Execute on your computer (not in the conga):
-
-```bash
-curl -fsL "https://raw.githubusercontent.com/gtrabanco/valetudo-conga-install/HEAD/remote_install" | bash
-```
-
-The script could take a very long time (> 30 minutes the full process).
-
 ### Manually Knowing the ip address of your conga
 
 Some routers have a admin webpage and some of those also includes a webpage where you can see the leased local ip address of dhcp server. If this is not you case you can use nmap but you need to know which ip range is serving your dhcp server:
@@ -67,6 +60,15 @@ nmap -Pn -p 22,53,6000 "$IP_RANGE" -oG - | awk '/\/open\// { print $2 }'
 
 One of the given results if the conga so you should see a reduced result...
 
+### Full automate installation instructions
+
+Execute on your computer (not in the conga):
+
+```bash
+curl -fsL "https://raw.githubusercontent.com/gtrabanco/valetudo-conga-install/HEAD/remote_install_from_computer" | bash
+```
+
+You need to know the ip address of your Conga.
 
 ### Install ssh public key manually
 
@@ -96,3 +98,9 @@ To install valetudo in the conga use:
 ```
 
 For more advanced options use `--help` option.
+
+## TESTING
+
+The compilation process previous to uploading was not tested, if you do please open an issue with the issues or notifing that works
+
+The `remote_install_from_computer` was not tested but should work as `conga-full-install` do.

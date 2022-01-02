@@ -3,6 +3,8 @@
 
 CONGA_IP="${1:-}"
 
+trap 'exit 1' SIGINT SIGTERM
+
 if [ -z "${KNOWN_CONGA_PASSWORDS[*]}" ]; then
   KNOWN_CONGA_PASSWORDS=(
     "3irobotics"
@@ -44,6 +46,7 @@ if ! has_ssh_keys; then
   generate_ssh_key || exit 1
 fi
 echo "SSH keys correctly configured"
+echo
 
 # Check conga ssh connection
 echo "Checking conga ssh connection to hostname/ip: ${CONGA_IP}"
@@ -51,18 +54,18 @@ if ! test_ssh_connection "$CONGA_IP" 22; then
   echo "Conga ssh connection is not working, check if hostname/ip \`${CONGA_IP}\` is correct"
   exit 1
 fi
+echo
 
 # Check password
 echo "Trying to install ssh key on conga with any known password"
 echo "This could be a long time work, around a minute..."
 for passwd in "${KNOWN_CONGA_PASSWORDS[@]}"; do
-  echo "Trying to connect with password: ${passwd}"
-  #if sshpass-copy-id root "${CONGA_IP}" 22 "${passwd//\$/\\\$}" >/dev/null 2>&1; then
-  if sshpass-copy-id root "${CONGA_IP}" 22 "$passwd"; then
+  if sshpass-copy-id "${CONGA_IP}" "${passwd//\$/\\\$}" root 22 > /dev/null 2>&1; then
     WORKING_PASSWORD=true
     break
   fi
 done
+echo
 
 if ${WORKING_PASSWORD:-false}; then
   echo "Found password: ${passwd}"
@@ -71,4 +74,4 @@ else
   exit 1
 fi
 
-
+exit 0

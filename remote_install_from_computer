@@ -21,6 +21,18 @@ depends_on git curl
   echo "This script must be used in your computer and not in your conga" &&
   exit 1
 
+
+while [ -z "${CONGA_IP:-}" ]; do
+  printf "Conga IP: "
+  read -r CONGA_IP
+  echo 
+done
+
+if ! ping -c 1 "${CONGA_IP:-}" >/dev/null 2>&1; then
+  echo "Conga IP \`$CONGA_IP\` is not reachable"
+  exit 1
+fi
+
 CONGA_INSTALL_PATH="${HOME}/valetudo-conga-install"
 git clone "$GIT_REPOSITORY" "$CONGA_INSTALL_PATH"
 
