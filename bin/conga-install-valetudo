@@ -30,10 +30,11 @@ VALETUDO_GIT_REPOSITORY="${VALETUDO_GIT_REPOSITORY:-https://github.com/adrigzr/V
 VALETUDO_GIT_BRANCH="${VALETUDO_GIT_BRANCH:-feature/conga}"
 VALETUDO_LOCAL_PATH="${VALETUDO_LOCAL_PATH:-$(mktemp -d)/Valetudo}"
 VALETUDO_CONGA_PATH="${VALETUDO_CONGA_PATH:-/mnt/UDISK/valetudo}"
-VALETUDO_VERSION="${VALETUDO_VERSION:-2021.09.1}"
+VALETUDO_VERSION="${VALETUDO_VERSION:-2021.10.0}"
+
+trap 'exit 1' SIGINT SIGTERM
 
 # Arguments
-mqtt=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --help|-h)
@@ -66,31 +67,21 @@ fi
 
 . "${SCRIPT_LIB_PATH}/core.sh"
 . "${SCRIPT_LIB_PATH}/ssh.sh"
-. "${SCRIPT_LIB_PATH}/log.sh"
 
 depends_on git ssh npm
 
 if
   ! test_ssh_connection "$CONGA_IP" 22 ||
-    ! test_ssh_login "root@${CONGA_IP}"
+  ! test_ssh_login "root@${CONGA_IP}"
 then
+  echo "Failed to connect to ${CONGA_IP}"
   echo "ERROR: SSH connection to conga failed."
   exit 1
 fi
 
-if
-  ${mqtt:-false} &&
-  [ -z "$MQTT_HOST" ] &&
-  [ -z "$MQTT_PORT" ] &&
-  [ -z "$MQTT_USER" ] &&
-  [ -z "$MQTT_PASSWORD" ]
-then
-  echo "ERROR: Any MQTT environment not specified."
-  exit 1
-fi
-
-if [ ! -r "${SCRIPT_CONFIG_PATH}/${VALETUDO_VERSION}.json" ]; then
-  echo "ERROR: Valetudo config version $VALETUDO_VERSION not found."
+VALETUDO_CONFIG_FILE="${VALETUDO_CONFIG_FILE:-${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/config/valetudo_config.json}"
+if [ ! -r "$VALETUDO_CONFIG_FILE" ]; then
+  echo "ERROR: Valetudo config version \`${VALETUDO_VERSION}\` not found."
   exit 1
 fi
 
@@ -98,49 +89,66 @@ if [ -f "${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/binary/valetudo" ]; then
   VALETUDO_BINARY="${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/binary/valetudo"
 else
   echo "Downloading Valetudo for Congas..."
-  git clone "${VALETUDO_GIT_REPOSITORY}" "${VALETUDO_LOCAL_PATH}" | _log || warning "Failed to clone Valetudo"
+  git clone "${VALETUDO_GIT_REPOSITORY}" "${VALETUDO_LOCAL_PATH}" || warning "Failed to clone Valetudo"
   cd "${VALETUDO_LOCAL_PATH}" || warning "Failed to cd into Valetudo"
 
   echo "Executing npm install... This will take a very long time depending on your internet connection."
-  npm install | _log || warning "Failed to npm install"
+  npm install || warning "Failed to npm install"
   echo
 
   echo "Executing npm clean install."
-  npm ci | _log || warning "Failed to npm ci"
+  npm ci || warning "Failed to npm ci"
   echo
 
   echo "Building openapi schema."
-  npm run build_openapi_schema | _log || warning "Failed to npm run build_openapi_schema"
+  npm run build_openapi_schema || warning "Failed to npm run build_openapi_schema"
   echo
 
   echo "Building Valetudo frontend..."
-  npm run build --workspace=frontend | _log || warning "Failed to npm run build"
+  npm run build --workspace=frontend || warning "Failed to npm run build"
   echo
 
   cd backend || warning "Failed to cd into backend"
 
   echo "Building Valetudo..."
-  npm run build | _log || warning "Failed to npm run build"
+  npm run build || warning "Failed to npm run build"
   [ ! -r "${VALETUDO_LOCAL_PATH}/build/armv7/valetudo" ] && warning "Failed to build valetudo"
   echo
 
   echo "Copying Valetudo to conga..."
-  ssh  "root@${CONGA_IP}" "mkdir -p '${VALETUDO_CONGA_PATH}'" | _log || warning "Failed to scp Valetudo to conga"
   VALETUDO_BINARY="${VALETUDO_LOCAL_PATH}/build/armv7/valetudo"
 fi
 
-scp  "$VALETUDO_BINARY" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed uploading Valetudo to the conga"
-ssh "root@${CONGA_IP}" "chmod +x '${VALETUDO_CONGA_PATH}/valetudo'" | _log || warning "Failed to chmod Valetudo to conga"
-scp  "${SCRIPT_ASSETS_PATH}/${VALETUDO_VERSION}/config/valetudo.json" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/" | _log || warning "Failed to scp Valetudo JSON config to conga"
+echo "Uploading Valetudo and its configuration to conga..."
+echo "THIS STEP COULD TAKE MORE THAN 2 MINUTES DEPENDING ON YOUR LOCAL WIFI CONNECTIVITY."
+{
+  ssh "root@${CONGA_IP}" "mkdir -p '${VALETUDO_CONGA_PATH}'"
+  ssh "root@${CONGA_IP}" "rm -f '${VALETUDO_CONGA_PATH}/valetudo'"
+  scp  "$VALETUDO_BINARY" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/"
+  ssh "root@${CONGA_IP}" "chmod +x '${VALETUDO_CONGA_PATH}/valetudo'"
+  scp  "$VALETUDO_CONFIG_FILE" "root@${CONGA_IP}:${VALETUDO_CONGA_PATH}/"
+} || warning "Failed uploading Valetudo & config file to the conga"
 echo
 
-echo "Resolving domains to localhost..."
-ssh "root@${CONGA_IP}" 'echo "127.0.0.1 cecotec.das.3irobotix.net cecotec.download.3irobotix.net cecotec.log.3irobotix.net cecotec.ota.3irobotix.net eu.das.3irobotics.net eu.log.3irobotics.net eu.ota.3irobotics.net cecotec-das.3irobotix.net cecotec-log.3irobotix.net cecotec-upgrade.3irobotix.net cecotec-download.3irobotix.net" >> /etc/hosts' | _log
+
+if ! ssh "root@${CONGA_IP}" 'grep -q "127.0.0.1  cecotec.das.3irobotix.net cecotec.download.3irobotix.net cecotec.log.3irobotix.net cecotec.ota.3irobotix.net eu.das.3irobotics.net eu.log.3irobotics.net eu.ota.3irobotics.net cecotec-das.3irobotix.net cecotec-log.3irobotix.net cecotec-upgrade.3irobotix.net cecotec-download.3irobotix.net" /etc/hosts'; then
+  echo "Resolving cecotec domains to localhost..."
+  ssh "root@${CONGA_IP}" 'echo "127.0.0.1  cecotec.das.3irobotix.net cecotec.download.3irobotix.net cecotec.log.3irobotix.net cecotec.ota.3irobotix.net eu.das.3irobotics.net eu.log.3irobotics.net eu.ota.3irobotics.net cecotec-das.3irobotix.net cecotec-log.3irobotix.net cecotec-upgrade.3irobotix.net cecotec-download.3irobotix.net" >> /etc/hosts'
+  ssh "root@${CONGA_IP}" 'echo >> /etc/hosts'
+else
+  echo "Skipping /etc/hosts configuration..."
+fi
 echo
 
-echo "Copying init script"
-scp "${SCRIPT_ASSETS_PATH}/init.valetudo" "root@${CONGA_IP}:/etc/init.d/valetudo" | _log || warning "Failed to scp valetudo.service to conga"
-ssh "root@${CONGA_IP}" "/etc/init.d/valetudo enable"
+if ssh "root@${CONGA_IP}" '[ ! -x "/etc/init.d/valetudo" ]'; then
+  echo "Copying init script"
+  ssh "root@${CONGA_IP}" "rm -f /etc/init.d/valetudo"
+  scp "${SCRIPT_ASSETS_PATH}/init.valetudo" "root@${CONGA_IP}:/etc/init.d/valetudo" || warning "Failed to scp valetudo.service to conga"
+  ssh "root@${CONGA_IP}" "chmod +x /etc/init.d/valetudo"
+  ssh "root@${CONGA_IP}" "/etc/init.d/valetudo enable"
+else
+  echo "Skipping init script configuration..."
+fi
 echo
 
 echo "Rebooting conga..."

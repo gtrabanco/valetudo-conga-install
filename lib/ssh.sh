@@ -5,7 +5,7 @@ test_ssh_connection() {
 }
 
 test_ssh_login() {
-  exec ssh -o BatchMode=yes "$@" "exit 0" >/dev/null 2>&1 || return 1
+  ssh -o BatchMode=yes "$@" "exit 0" >/dev/null 2>&1 || return 1
 }
 
 has_ssh_keys() {
