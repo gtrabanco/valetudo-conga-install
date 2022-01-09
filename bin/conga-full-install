@@ -5,19 +5,16 @@ SCRIPT_BIN_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 trap 'exit 1' SIGINT SIGTERM
 
-if [ -z "${CONGA_IP_ADDRESS}" ]; then
-  echo "Looking for the conga IP address..."
-  "${SCRIPT_BIN_PATH}/conga-install-unknown-ipv4"
-else
-  shift
-  echo "Beginning installation of Valetudo on ${CONGA_IP_ADDRESS}..."
-  echo "Installing certificates..."
-  "${SCRIPT_BIN_PATH}/conga-install-ssh" "${CONGA_IP_ADDRESS}" "$@" >/dev/null 2>&1 || {
-    echo "Failed to install ssh" && exit 1
-  }
-  echo "Certificate installed"
-  
-  echo "Installing Valetudo..."
-  "${SCRIPT_BIN_PATH}/conga-install-valetudo" "${CONGA_IP_ADDRESS}" "$@" || echo "Failed to install valetudo" && exit 1
-  echo "Valetudo installed"
-fi
+[[ $# -eq 0 ]] && { echo "Usage: $0 <conga-ip-address>"; exit 1; }
+
+shift
+echo "Beginning installation of Valetudo on ${CONGA_IP_ADDRESS}..."
+echo "Installing certificates..."
+"${SCRIPT_BIN_PATH}/conga-install-ssh" "${CONGA_IP_ADDRESS}" "$@" >/dev/null 2>&1 || {
+  echo "Failed to install ssh" && exit 1
+}
+echo "Certificate installed"
+
+echo "Installing Valetudo..."
+"${SCRIPT_BIN_PATH}/conga-install-valetudo" "${CONGA_IP_ADDRESS}" "$@" || echo "Failed to install valetudo" && exit 1
+echo "Valetudo installed"

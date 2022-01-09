@@ -10,27 +10,28 @@ if {$port eq ""} {set port 22}
 send_user "Connecting to ${server}:${port} with password: $passwd \n"
 
 set try 0
-spawn ssh-copy-id -f -p $port -o PreferredAuthentications=password -o PubkeyAuthentication=no "${user}@${server}"
+spawn ssh-copy-id -f -p $port -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${user}@${server}"
 match_max 100000
 expect {
-  "*(yes/no/?fingerprint?)*" {
-    send "yes\r"
-    send -- "\r"
+  "continue" {
+    send "yes\n"
+    send -- "\n"
+    exp_continue
   }
 
-  "*?assword:*" {
+  "assword:" {
     if { $try > 0 } {
       send_user "Too many tries\n"
       exit 1
     }
 
     incr try
-    send -- "$passwd\r"
-    send -- "\r"
-    send_user "login with password\n"
+    send -- "${passwd}\n"
+    send -- "\n"
+    exp_continue
   }
-  "*Number of key(s) added: 1*" { exit 0 }
-  "*ermission denied*" { exit 1 }
+  "Number of key(s) added: 1" { exit 0 }
+  "ermission denied" { exit 1 }
   eof { exit 0 }
 }
 exit 1

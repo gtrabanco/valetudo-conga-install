@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#shellcheck disable=SC2207,SC1091
+#shellcheck disable=SC2207,SC1091,SC2016
 
 CONGA_IP="${1:-}"
 
@@ -7,8 +7,8 @@ trap 'exit 1' SIGINT SIGTERM
 
 if [ -z "${KNOWN_CONGA_PASSWORDS[*]}" ]; then
   KNOWN_CONGA_PASSWORDS=(
-    "3irobotics"
-    "@3I#sc\$RD%xm^2S&"
+    '3irobotics'
+    '@3I#sc$RD%xm^2S&'
   )
 fi
 SCRIPT_BIN_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -60,18 +60,19 @@ echo
 echo "Trying to install ssh key on conga with any known password"
 echo "This could be a long time work, around a minute..."
 for passwd in "${KNOWN_CONGA_PASSWORDS[@]}"; do
-  if sshpass-copy-id "${CONGA_IP}" "${passwd//\$/\\\$}" root 22 > /dev/null 2>&1; then
+  [ -z "$passwd" ] && continue
+  echo "Trying password: ${passwd}"
+  if sshpass-copy-id "${CONGA_IP}" "${passwd}" root 22 > /dev/null 2>&1; then
     WORKING_PASSWORD=true
     break
   fi
 done
 echo
 
-if ${WORKING_PASSWORD:-false}; then
-  echo "Found password: ${passwd}"
-else
+if ! ${WORKING_PASSWORD:-false}; then
   echo "No password found, you must install it manually"
   exit 1
 fi
 
+echo "Found password: ${passwd}"
 exit 0
