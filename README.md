@@ -1,5 +1,7 @@
-## UNTESTED
+## WARNING
 **WARNING!** These scripts could damage your vacuum!
+
+## INDEX
 
 - [UNTESTED](#untested)
 - [WARRANTY](#warranty)
@@ -34,7 +36,7 @@ To use these scripts they must be downloaded:
 
 ```bash
 CONGA_INSTALL_PATH="${HOME}/valetudo-conga-install"
-git clone git@github.com:gtrabanco/valetudo-conga-install.git "$CONGA_INSTALL_PATH"
+git clone https://github.com/gtrabanco/valetudo-conga-install.git "$CONGA_INSTALL_PATH"
 ```
 
 This readme will be redacted as this repository were downloaded in `CONGA_INSTALL_PATH` variable
